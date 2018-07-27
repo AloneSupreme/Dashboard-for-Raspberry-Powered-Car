@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 import os
 import pygame
 from math import tan, radians, degrees, copysign
@@ -5,8 +6,8 @@ from pygame.math import Vector2
 
 
 class Car:
-    def __init__(self, x, y, angle=0.0, length=4, max_steering=30, max_acceleration=5.0):
-        self.position = Vector2(x, y)
+    def __init__(self, x, y, angle=0.0, length=4, max_steering=50, max_acceleration=5.0):
+        self.position = Vector2(x, y) # max x is 40 and max y is 20
         self.velocity = Vector2(0.0, 0.0)
         self.angle = angle
         self.length = length
@@ -36,20 +37,33 @@ class Car:
 class Game:
     def __init__(self):
         pygame.init()
-        pygame.display.set_caption("Car tutorial")
+        pygame.display.set_caption("Supreme Car")
         width = 1280
         height = 720
+        self.blueColor = (86, 156, 214)
+        self.blackColor = (35, 35, 35)
+        self.whiteColor = (255, 250, 250)
+        self.myFont = pygame.font.SysFont("Consolas, 'Courier New', monospace", 14, True)
         self.screen = pygame.display.set_mode((width, height))
+        
         self.clock = pygame.time.Clock()
         self.ticks = 60
         self.exit = False
 
     def run(self):
         current_dir = os.path.dirname(os.path.abspath(__file__))
-        image_path = os.path.join(current_dir, "car.png")
-        car_image = pygame.image.load(image_path)
-        car = Car(0, 0)
-        ppu = 32
+        logo_image_path = os.path.join(current_dir, "images\\arrow_logo.png")
+        logo_image = pygame.image.load(logo_image_path)
+        car_image_path = os.path.join(current_dir, "images\car.png")
+        car_image = pygame.image.load(car_image_path)
+        arrow_image_path = os.path.join(current_dir, "images\\arrow.png")
+        arrow_image = pygame.image.load(arrow_image_path)
+        # arrow_image = pygame.transform.scale(arrow_image, (30,30))
+
+        pygame.display.set_icon(logo_image)
+        car = Car(5, 2.5) # Initial position of car
+        car_ppu = 32
+        arrow_ppu = 8
 
         while not self.exit:
             dt = self.clock.get_time() / 1000
@@ -95,12 +109,32 @@ class Game:
 
             # Logic
             car.update(dt)
+            
+            # Drawing CAR
+            self.screen.fill(self.blackColor)
+            car_rotated = pygame.transform.rotate(car_image, car.angle)
+            car_rect = car_rotated.get_rect()
+            self.screen.blit(car_rotated, car.position * car_ppu - (car_rect.width / 2, car_rect.height / 2))
+            
+            #Drawing Arrow
+            arrow_rotated = pygame.transform.rotate(arrow_image, car.angle)
+            arrow_rect = arrow_rotated.get_rect()
+            self.screen.blit(arrow_rotated, Vector2(155,85) * arrow_ppu - (arrow_rect.width / 2, arrow_rect.height / 2))
 
-            # Drawing
-            self.screen.fill((0, 0, 0))
-            rotated = pygame.transform.rotate(car_image, car.angle)
-            rect = rotated.get_rect()
-            self.screen.blit(rotated, car.position * ppu - (rect.width / 2, rect.height / 2))
+            # Drawing Quick Info
+            lblVelocity = self.myFont.render("Velocity: ", 1, self.blueColor)
+            valVelocity = self.myFont.render(('%.2f' % car.velocity.x)+" units/sec", 1, self.whiteColor )
+            lblAccelaration = self.myFont.render("Accelaration: ", 1, self.blueColor )
+            valAccelaration = self.myFont.render(('%.2f' % car.acceleration) + " units/sec\N{SUPERSCRIPT TWO}", 1, self.whiteColor )
+            lblAngle = self.myFont.render("Angle: ", 1, self.blueColor )
+            valAngle = self.myFont.render(('%.1f' % (car.angle % 360)) + "°", 1, self.whiteColor )
+            self.screen.blit(lblVelocity, (1000,10))
+            self.screen.blit(valVelocity, (1110,10))
+            self.screen.blit(lblAccelaration, (1000,30))
+            self.screen.blit(valAccelaration, (1110,30))
+            self.screen.blit(lblAngle, (1000,50))
+            self.screen.blit(valAngle, (1110,50))
+            
             pygame.display.flip()
 
             self.clock.tick(self.ticks)

@@ -58,7 +58,10 @@ class Game:
         car_image = pygame.image.load(car_image_path)
         arrow_image_path = os.path.join(current_dir, "images\\arrow.png")
         arrow_image = pygame.image.load(arrow_image_path)
-        # arrow_image = pygame.transform.scale(arrow_image, (30,30))
+        road_image_path = os.path.join(current_dir, "images\\Road.jpg")
+        road_image = pygame.image.load(road_image_path).convert()
+        arrow_image = pygame.transform.scale(arrow_image, (20,20))
+        car_image = pygame.transform.scale(car_image, (64,32))
 
         pygame.display.set_icon(logo_image)
         car = Car(5, 2.5) # Initial position of car
@@ -87,10 +90,12 @@ class Game:
                 else:
                     car.acceleration -= 1 * dt
             elif pressed[pygame.K_SPACE]:
-                if abs(car.velocity.x) > dt * car.brake_deceleration:
-                    car.acceleration = -copysign(car.brake_deceleration, car.velocity.x)
-                else:
-                    car.acceleration = -car.velocity.x / dt
+                car.velocity.x = 0 # sudden brake without any decelerating concept
+
+                # if abs(car.velocity.x) > dt * car.brake_deceleration:
+                #     car.acceleration = -copysign(car.brake_deceleration, car.velocity.x)
+                # else:
+                #     car.acceleration = -car.velocity.x / dt
             else:
                 if abs(car.velocity.x) > dt * car.free_deceleration:
                     car.acceleration = -copysign(car.free_deceleration, car.velocity.x)
@@ -100,9 +105,11 @@ class Game:
             car.acceleration = max(-car.max_acceleration, min(car.acceleration, car.max_acceleration))
 
             if pressed[pygame.K_RIGHT]:
-                car.steering -= 30 * dt
+                # car.steering -= 30 * dt
+                car.steering = -car.max_steering
             elif pressed[pygame.K_LEFT]:
-                car.steering += 30 * dt
+                # car.steering += 30 * dt
+                car.steering = car.max_steering
             else:
                 car.steering = 0
             car.steering = max(-car.max_steering, min(car.steering, car.max_steering))
@@ -111,7 +118,8 @@ class Game:
             car.update(dt)
             
             # Drawing CAR
-            self.screen.fill(self.blackColor)
+            # self.screen.fill(self.blackColor)
+            self.screen.blit(road_image, [0, 0]) # background image instead of solid color
             car_rotated = pygame.transform.rotate(car_image, car.angle)
             car_rect = car_rotated.get_rect()
             self.screen.blit(car_rotated, car.position * car_ppu - (car_rect.width / 2, car_rect.height / 2))
@@ -119,22 +127,34 @@ class Game:
             #Drawing Arrow
             arrow_rotated = pygame.transform.rotate(arrow_image, car.angle)
             arrow_rect = arrow_rotated.get_rect()
+            pygame.draw.circle(self.screen, self.blackColor, [1240, 680], 20)
             self.screen.blit(arrow_rotated, Vector2(155,85) * arrow_ppu - (arrow_rect.width / 2, arrow_rect.height / 2))
 
             # Drawing Quick Info
+            # Draw a rectangle outline
+            # pygame.draw.rect(self.screen, self.blackColor, [980, 0, 280, 90])
+            s = pygame.Surface((280,90))  # the size of your rect
+            s.set_alpha(200)                # alpha level
+            s.fill(self.blackColor)           # this fills the entire surface
+            self.screen.blit(s, (980,0))    # (0,0) are the top-left coordinates
             lblVelocity = self.myFont.render("Velocity: ", 1, self.blueColor)
             valVelocity = self.myFont.render(('%.2f' % car.velocity.x)+" units/sec", 1, self.whiteColor )
             lblAccelaration = self.myFont.render("Accelaration: ", 1, self.blueColor )
             valAccelaration = self.myFont.render(('%.2f' % car.acceleration) + " units/sec\N{SUPERSCRIPT TWO}", 1, self.whiteColor )
             lblAngle = self.myFont.render("Angle: ", 1, self.blueColor )
             valAngle = self.myFont.render(('%.1f' % (car.angle % 360)) + "°", 1, self.whiteColor )
+            lblSteering = self.myFont.render("Steering: ", 1, self.blueColor )
+            valSteering = self.myFont.render( '%.1f' % car.steering, 1, self.whiteColor )
+            valFps = self.myFont.render( '%.1f' % self.clock.get_fps() + " FPS", 1, self.whiteColor )
             self.screen.blit(lblVelocity, (1000,10))
             self.screen.blit(valVelocity, (1110,10))
             self.screen.blit(lblAccelaration, (1000,30))
             self.screen.blit(valAccelaration, (1110,30))
             self.screen.blit(lblAngle, (1000,50))
             self.screen.blit(valAngle, (1110,50))
-            
+            self.screen.blit(lblSteering, (1000,70))
+            self.screen.blit(valSteering, (1110,70))
+            self.screen.blit(valFps, (10, 700))
             pygame.display.flip()
 
             self.clock.tick(self.ticks)

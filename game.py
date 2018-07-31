@@ -56,17 +56,17 @@ class Game:
         logo_image = pygame.image.load(logo_image_path)
         car_image_path = os.path.join(current_dir, "images\car.png")
         car_image = pygame.image.load(car_image_path)
-        arrow_image_path = os.path.join(current_dir, "images\\arrow.png")
+        arrow_image_path = os.path.join(current_dir, "images\\arrow2.png")
         arrow_image = pygame.image.load(arrow_image_path)
         road_image_path = os.path.join(current_dir, "images\\Road.jpg")
         road_image = pygame.image.load(road_image_path).convert()
-        arrow_image = pygame.transform.scale(arrow_image, (20,20))
+        arrow_image = pygame.transform.scale(arrow_image, (35,35))
         car_image = pygame.transform.scale(car_image, (64,32))
 
         pygame.display.set_icon(logo_image)
         car = Car(5, 2.5) # Initial position of car
         car_ppu = 32
-        arrow_ppu = 8
+        arrow_ppu = 32
 
         while not self.exit:
             dt = self.clock.get_time() / 1000
@@ -125,35 +125,48 @@ class Game:
             self.screen.blit(car_rotated, car.position * car_ppu - (car_rect.width / 2, car_rect.height / 2))
             
             #Drawing Arrow
-            arrow_rotated = pygame.transform.rotate(arrow_image, car.angle)
+            arrow_rotated = pygame.transform.rotozoom(arrow_image, car.angle,1)
             arrow_rect = arrow_rotated.get_rect()
-            pygame.draw.circle(self.screen, self.blackColor, [1240, 680], 20)
-            self.screen.blit(arrow_rotated, Vector2(155,85) * arrow_ppu - (arrow_rect.width / 2, arrow_rect.height / 2))
+            # pygame.draw.circle(self.screen, self.blackColor, [1240, 680], 20)
+            self.screen.blit(arrow_rotated, Vector2(38,21) * arrow_ppu - (arrow_rect.width / 2, arrow_rect.height / 2))
 
             # Drawing Quick Info
             # Draw a rectangle outline
             # pygame.draw.rect(self.screen, self.blackColor, [980, 0, 280, 90])
-            s = pygame.Surface((280,90))  # the size of your rect
-            s.set_alpha(200)                # alpha level
-            s.fill(self.blackColor)           # this fills the entire surface
-            self.screen.blit(s, (980,0))    # (0,0) are the top-left coordinates
+            rectSurface1 = pygame.Surface((280,90))    # the size of your rect
+            rectSurface1.set_alpha(200)                # alpha level
+            rectSurface1.fill(self.blackColor)         # this fills the entire surface
+            self.screen.blit(rectSurface1, (980,5))    # (980,0) are the top-right Quick-View coordinates
+
+            rectSurface2 = pygame.Surface((75,23))
+            rectSurface2.set_alpha(200)
+            rectSurface2.fill(self.blackColor)
+            self.screen.blit(rectSurface2, (5, 695))
+
             lblVelocity = self.myFont.render("Velocity: ", 1, self.blueColor)
             valVelocity = self.myFont.render(('%.2f' % car.velocity.x)+" units/sec", 1, self.whiteColor )
             lblAccelaration = self.myFont.render("Accelaration: ", 1, self.blueColor )
             valAccelaration = self.myFont.render(('%.2f' % car.acceleration) + " units/sec\N{SUPERSCRIPT TWO}", 1, self.whiteColor )
             lblAngle = self.myFont.render("Angle: ", 1, self.blueColor )
             valAngle = self.myFont.render(('%.1f' % (car.angle % 360)) + "°", 1, self.whiteColor )
+            if car.steering < 0:
+                direction = "Right"
+            elif car.steering > 0:
+                direction = "Left"
+            else:
+                direction = "Straight"
+
             lblSteering = self.myFont.render("Steering: ", 1, self.blueColor )
-            valSteering = self.myFont.render( '%.1f' % car.steering, 1, self.whiteColor )
+            valSteering = self.myFont.render( direction, 1, self.whiteColor )
             valFps = self.myFont.render( '%.1f' % self.clock.get_fps() + " FPS", 1, self.whiteColor )
-            self.screen.blit(lblVelocity, (1000,10))
-            self.screen.blit(valVelocity, (1110,10))
-            self.screen.blit(lblAccelaration, (1000,30))
-            self.screen.blit(valAccelaration, (1110,30))
-            self.screen.blit(lblAngle, (1000,50))
-            self.screen.blit(valAngle, (1110,50))
-            self.screen.blit(lblSteering, (1000,70))
-            self.screen.blit(valSteering, (1110,70))
+            self.screen.blit(lblVelocity, (1000,15))
+            self.screen.blit(valVelocity, (1110,15))
+            self.screen.blit(lblAccelaration, (1000,35))
+            self.screen.blit(valAccelaration, (1110,35))
+            self.screen.blit(lblAngle, (1000,55))
+            self.screen.blit(valAngle, (1110,55))
+            self.screen.blit(lblSteering, (1000,75))
+            self.screen.blit(valSteering, (1110,75))
             self.screen.blit(valFps, (10, 700))
             pygame.display.flip()
 

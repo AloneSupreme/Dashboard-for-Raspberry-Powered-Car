@@ -53,15 +53,18 @@ class Game:
     def run(self):
         current_dir = os.path.dirname(os.path.abspath(__file__))
         logo_image_path = os.path.join(current_dir, "images\\arrow_logo.png")
-        logo_image = pygame.image.load(logo_image_path)
+        logo_image = pygame.image.load(logo_image_path).convert_alpha()
         car_image_path = os.path.join(current_dir, "images\car.png")
-        car_image = pygame.image.load(car_image_path)
+        car_image = pygame.image.load(car_image_path).convert_alpha()
         arrow_image_path = os.path.join(current_dir, "images\\arrow2.png")
-        arrow_image = pygame.image.load(arrow_image_path)
+        arrow_image = pygame.image.load(arrow_image_path).convert_alpha()
         road_image_path = os.path.join(current_dir, "images\\Road.jpg")
-        road_image = pygame.image.load(road_image_path).convert()
+        road_image = pygame.image.load(road_image_path).convert_alpha()
+        arrowKeys_image_path = os.path.join(current_dir, "images\\keyboard-arrows.png")
+        arrowKeys_image = pygame.image.load(arrowKeys_image_path).convert_alpha()
         arrow_image = pygame.transform.scale(arrow_image, (35,35))
         car_image = pygame.transform.scale(car_image, (64,32))
+        arrowKeys_image = pygame.transform.scale(arrowKeys_image, (212,102))
 
         pygame.display.set_icon(logo_image)
         car = Car(5, 2.5) # Initial position of car
@@ -129,6 +132,9 @@ class Game:
             arrow_rect = arrow_rotated.get_rect()
             # pygame.draw.circle(self.screen, self.blackColor, [1240, 680], 20)
             self.screen.blit(arrow_rotated, Vector2(38,21) * arrow_ppu - (arrow_rect.width / 2, arrow_rect.height / 2))
+
+            # Drawing Keyboard Arrow Keys
+            self.screen.blit(arrowKeys_image, [530,500])
 
             # Drawing Quick Info
             # Draw a rectangle outline

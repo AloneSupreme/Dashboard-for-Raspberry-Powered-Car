@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 import os
+import platform
 import pygame
 from math import tan, radians, degrees, copysign
 from pygame.math import Vector2
@@ -49,13 +50,16 @@ class Game:
         self.screen = pygame.display.set_mode((width, height))
         
         # PI Camera initialization
-        DEVICE = '/dev/video0'
-        CAPTURED_FILE = 'capture.png'
         
-        pygame.camera.init()
-        self.camera = pygame.camera.Camera(DEVICE, (width, height))
-        self.camera.start()
-        self.cam = pygame.surface.Surface((width, height), 0, self.screen)
+        self.liveFlag = False if platform.system() == 'Windows' else True
+        if self.liveFlag:
+            DEVICE = '/dev/video0'
+            CAPTURED_FILE = 'capture.png'
+            
+            pygame.camera.init()
+            self.camera = pygame.camera.Camera(DEVICE, (width, height))
+            self.camera.start()
+            self.cam = pygame.surface.Surface((width, height), 0, self.screen)
         
         self.clock = pygame.time.Clock()
         self.ticks = 60
@@ -63,7 +67,6 @@ class Game:
 
     def run(self):
         current_dir = os.path.dirname(os.path.abspath(__file__))
-<<<<<<< HEAD
         logo_image_path = os.path.join(current_dir, "images\\arrow_logo.png")
         logo_image = pygame.image.load(logo_image_path).convert_alpha()
         car_image_path = os.path.join(current_dir, "images\car.png")
@@ -74,16 +77,6 @@ class Game:
         road_image = pygame.image.load(road_image_path).convert_alpha()
         arrowKeys_image_path = os.path.join(current_dir, "images\\keyboard-arrows.png")
         arrowKeys_image = pygame.image.load(arrowKeys_image_path).convert_alpha()
-=======
-        logo_image_path = os.path.join(current_dir, "images/arrow_logo.png")
-        logo_image = pygame.image.load(logo_image_path)
-        car_image_path = os.path.join(current_dir, "images/car.png")
-        car_image = pygame.image.load(car_image_path)
-        arrow_image_path = os.path.join(current_dir, "images/arrow2.png")
-        arrow_image = pygame.image.load(arrow_image_path)
-        road_image_path = os.path.join(current_dir, "images/Road.jpg")
-        road_image = pygame.image.load(road_image_path).convert()
->>>>>>> ff9c27f343a0f6728914215789eda3b28a11912c
         arrow_image = pygame.transform.scale(arrow_image, (35,35))
         car_image = pygame.transform.scale(car_image, (64,32))
         arrowKeys_image = pygame.transform.scale(arrowKeys_image, (212,102))
@@ -142,13 +135,15 @@ class Game:
             # Logic
             car.update(dt)
             
+            # Drawing background
+            if self.liveFlag:
+                self.cam = self.camera.get_image(self.cam)
+                self.screen.blit(self.cam, (0,0))
+            else:
+                # self.screen.fill(self.blackColor)
+                self.screen.blit(road_image, [0, 0]) # background image instead of solid color or Live stream
+
             # Drawing CAR
-            # self.screen.fill(self.blackColor)
-            # self.screen.blit(road_image, [0, 0]) # background image instead of solid color
-            self.cam = self.camera.get_image(self.cam)
-            self.screen.blit(self.cam, (0,0))
-            
-            
             car_rotated = pygame.transform.rotate(car_image, car.angle)
             car_rect = car_rotated.get_rect()
             self.screen.blit(car_rotated, car.position * car_ppu - (car_rect.width / 2, car_rect.height / 2))
@@ -161,6 +156,12 @@ class Game:
 
             # Drawing Keyboard Arrow Keys
             self.screen.blit(arrowKeys_image, [530,500])
+
+            surface1 = pygame.Surface((100,100))
+            surface1.set_colorkey((0,0,0))
+            surface1.set_alpha(150)
+            pygame.draw.circle(surface1, self.blueColor, (20,20), 20)
+            self.screen.blit(surface1, (618,505))
 
             # Drawing Quick Info
             # Draw a rectangle outline
@@ -203,6 +204,8 @@ class Game:
             pygame.display.flip()
 
             self.clock.tick(self.ticks)
+        if self.liveFlag:
+            self.cam.stop()
         pygame.quit()
 
 
